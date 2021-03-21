@@ -4,7 +4,12 @@ require 'fastimage'
 require_relative 'dcimage.rb'
 require_relative 'dcutils.rb'
 
-options = {}
+options = {
+    mode: nil,
+    coverImg: nil,
+    secretImg: nil,
+    output: nil
+}
 
 OptionParser.new do |opts|
     opts.on("-m", "--mode encode", String, "Encode/Decode") do |mode|
@@ -45,7 +50,7 @@ begin
     coverImg = MiniMagick::Image.open(options[:coverImg])
     secretImg = MiniMagick::Image.open(options[:secretImg])
     
-    stegno_applicaton = Stegno::DCUtils.new(coverImg, secretImg, options[:mode])
+    stegno_applicaton = Stegno::DCUtils.new(coverImg, secretImg, "testImage", options[:mode])
     stegno_applicaton.start
 end
 
