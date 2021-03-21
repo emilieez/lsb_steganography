@@ -33,10 +33,10 @@ end.parse!
 
 
 def checkImageSize(cover, secret) 
-    coverImgSize = FastImage.size(cover)
-    secretImgSize = FastImage.size(secret)
+    coverImgSize = cover.size
+    secretImgSize = secret.size
 
-    if coverImgSize[0] * coverImgSize[1] < (secretImgSize[0] * secretImgSize[1] * 8)
+    if coverImgSize < (secretImgSize*8)
         puts "Cover image is not big enough!"
         # exit(1)
     end
@@ -45,10 +45,10 @@ end
 
 
 begin
-    checkImageSize(options[:coverImg], options[:secretImg])
-
     coverImg = MiniMagick::Image.open(options[:coverImg])
     secretImg = MiniMagick::Image.open(options[:secretImg])
+
+    checkImageSize(coverImg, secretImg)
     
     stegno_applicaton = Stegno::DCUtils.new(coverImg, secretImg, "testImage", options[:mode])
     stegno_applicaton.start
