@@ -47,23 +47,36 @@ module Stegno
 
         def encodeLSBInPixelChannel(channel, y, x)
             value = @secretImgPixels[y][x][@rgb[channel]]
-            binary = value.to_s(2)
+            binary = conver8BitBinary(value)
 
+            current_bit = 0
             binary.each_char{ |b|
                 if b == '1'
-                    if isEvenNumber(@coverImgPixels[y][x][@rgb[channel]])
-                        @coverImgPixels[y][x][@rgb[channel]] += 1
+                    if isEvenNumber(@coverImgPixels[y][x + current_bit][@rgb[channel]])
+                        @coverImgPixels[y][x + current_bit][@rgb[channel]] += 1
                     end
                 elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[y][x][@rgb[channel]])
-                        @coverImgPixels[y][x][@rgb[channel]] -= 1
+                    if !isEvenNumber(@coverImgPixels[y][x + current_bit][@rgb[channel]])
+                        @coverImgPixels[y][x + current_bit][@rgb[channel]] -= 1
                     end
                 end
+                
+                current_bit += 1
             }
         end
 
         def isEvenNumber(num)
             return num % 2 == 0
+        end
+
+        def conver8BitBinary(num)
+            binary = num.to_s(2)
+            if binary.length < 8
+                zeros = '0' * (8 - binary.length)
+                return zeros + binary
+            else
+                return binary
+            end
         end
     end
 end
