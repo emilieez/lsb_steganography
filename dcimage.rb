@@ -45,9 +45,6 @@ module Stegno
             (0..max_coverImg_y - 1).each{ |y|
                 decoded_pixels.push([])
                 (0..max_coverImg_x - 1).each{ |x|
-                    current_r_bin += decodeLSBInPixelChannel('r', y, x)
-                    current_g_bin += decodeLSBInPixelChannel('g', y, x)
-                    current_b_bin += decodeLSBInPixelChannel('b', y, x)
 
                     if x % 8 == 0 && x != 0
                         r_value = current_r_bin.to_i(2)
@@ -60,6 +57,10 @@ module Stegno
                         current_g_bin = ""
                         current_b_bin = ""
                     end
+
+                    current_r_bin += decodeLSBInPixelChannel('r', y, x)
+                    current_g_bin += decodeLSBInPixelChannel('g', y, x)
+                    current_b_bin += decodeLSBInPixelChannel('b', y, x)
                 }
             }
             image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8 ,'png')
