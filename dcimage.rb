@@ -49,7 +49,7 @@ module Stegno
                     current_g_bin += decodeLSBInPixelChannel('g', y, x)
                     current_b_bin += decodeLSBInPixelChannel('b', y, x)
 
-                    if x % 8 == 0
+                    if x % 8 == 0 && x != 0
                         r_value = current_r_bin.to_i(2)
                         g_value = current_g_bin.to_i(2)
                         b_value = current_b_bin.to_i(2)
