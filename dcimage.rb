@@ -40,7 +40,7 @@ module Stegno
 
             (0..max_coverImg_y - 1).each{ |y|
                 (0..max_coverImg_x - 1).each{ |x|
-                   
+                   secret_x = x * 8
                 }
             }
         end
@@ -49,20 +49,25 @@ module Stegno
             value = @secretImgPixels[y][x][@rgb[channel]]
             binary = conver8BitBinary(value)
 
+            cover_x = x * 8
+
             current_bit = 0
             binary.each_char{ |b|
                 if b == '1'
-                    if isEvenNumber(@coverImgPixels[y][x + current_bit][@rgb[channel]])
-                        @coverImgPixels[y][x + current_bit][@rgb[channel]] += 1
+                    if isEvenNumber(@coverImgPixels[y][cover_x + current_bit][@rgb[channel]])
+                        @coverImgPixels[y][cover_x + current_bit][@rgb[channel]] += 1
                     end
                 elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[y][x + current_bit][@rgb[channel]])
-                        @coverImgPixels[y][x + current_bit][@rgb[channel]] -= 1
+                    if !isEvenNumber(@coverImgPixels[y][cover_x + current_bit][@rgb[channel]])
+                        @coverImgPixels[y][cover_x + current_bit][@rgb[channel]] -= 1
                     end
                 end
                 
                 current_bit += 1
             }
+        end
+
+        def decodeLSBInPixelChannel(channel, y, x)
         end
 
         def isEvenNumber(num)

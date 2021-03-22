@@ -36,7 +36,7 @@ def checkImageSize(cover, secret)
     coverImgSize = cover.size
     secretImgSize = secret.size
 
-    if coverImgSize < (secretImgSize*8)
+    if cover.width < secret.width*8 || cover.height < secret.height*8
         puts "Cover image is not big enough!"
         # exit(1)
     end
