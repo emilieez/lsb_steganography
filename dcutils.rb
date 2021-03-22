@@ -1,6 +1,6 @@
 module Stegno
     class DCUtils
-        def initialize(coverImg, secretImg, secretImgName, mode)
+        def initialize(coverImg, mode, secretImg=nil, secretImgName=nil)
             @coverImg = coverImg
             @secretImg = secretImg
             @secretImgName = secretImgName
@@ -20,7 +20,9 @@ module Stegno
             dcImage.encodeImage()
         end
 
-        def decode(pixel)
+        def decode
+            dcImage = Stegno::DCImage.new(@coverImg)
+            dcImage.decodeImage()
         end
     end
 end

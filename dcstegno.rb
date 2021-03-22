@@ -46,11 +46,14 @@ end
 
 begin
     coverImg = MiniMagick::Image.open(options[:coverImg])
-    secretImg = MiniMagick::Image.open(options[:secretImg])
+    secretImg = nil;
 
-    checkImageSize(coverImg, secretImg)
+    if options[:mode] == "encode"
+        secretImg = MiniMagick::Image.open(options[:secretImg])
+        checkImageSize(coverImg, secretImg)
+    end
     
-    stegno_applicaton = Stegno::DCUtils.new(coverImg, secretImg, "testImage", options[:mode])
+    stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], secretImg, "testImage")
     stegno_applicaton.start
 end
 
