@@ -20,11 +20,15 @@ module Stegno
             max_secretImg_y = @secretImg.height
             max_secretImg_x = @secretImg.width 
 
+            nth_secret_pix = 0
+
             (0..max_secretImg_y - 1).each{ |y|
                 (0..max_secretImg_x - 1).each{ |x|
-                    encodeLSBInPixelChannel('r', y, x)
-                    encodeLSBInPixelChannel('g', y, x)
-                    encodeLSBInPixelChannel('b', y, x)
+                    encodeLSBInPixelChannel('r', y, x, nth_secret_pix)
+                    encodeLSBInPixelChannel('g', y, x, nth_secret_pix)
+                    encodeLSBInPixelChannel('b', y, x, nth_secret_pix)
+
+                    nth_secret_pix += 1
                 }
             }
 
@@ -42,11 +46,17 @@ module Stegno
             current_g_bin = ""
             current_b_bin = ""
 
+            nth_cover_pix = 0
+
             (0..max_coverImg_y - 1).each{ |y|
                 decoded_pixels.push([])
                 (0..max_coverImg_x - 1).each{ |x|
 
-                    if x % 8 == 0 && x != 0
+                    current_r_bin += decodeLSBInPixelChannel('r', y, x)
+                    current_g_bin += decodeLSBInPixelChannel('g', y, x)
+                    current_b_bin += decodeLSBInPixelChannel('b', y, x)
+
+                    if nth_cover_pix % 8 == 7
                         r_value = current_r_bin.to_i(2)
                         g_value = current_g_bin.to_i(2)
                         b_value = current_b_bin.to_i(2)
@@ -58,30 +68,32 @@ module Stegno
                         current_b_bin = ""
                     end
 
-                    current_r_bin += decodeLSBInPixelChannel('r', y, x)
-                    current_g_bin += decodeLSBInPixelChannel('g', y, x)
-                    current_b_bin += decodeLSBInPixelChannel('b', y, x)
+                    nth_cover_pix += 1
                 }
             }
             image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8 ,'png')
             image.write('output1.png')
         end
 
-        def encodeLSBInPixelChannel(channel, y, x)
+        def encodeLSBInPixelChannel(channel, y, x, nth_secret_pix)
             value = @secretImgPixels[y][x][@rgb[channel]]
             binary = conver8BitBinary(value)
 
-            cover_x = x * 8
+            nth_cover_pix = nth_secret_pix * 8
+            cover_pix_coordinates = getXYfromNthPixel(nth_cover_pix, @coverImg.width)
+            
+            cover_x = cover_pix_coordinates[:x]
+            cover_y = cover_pix_coordinates[:y]
 
             current_bit = 0
             binary.each_char{ |b|
                 if b == '1'
-                    if isEvenNumber(@coverImgPixels[y][cover_x + current_bit][@rgb[channel]])
-                        @coverImgPixels[y][cover_x + current_bit][@rgb[channel]] += 1
+                    if isEvenNumber(@coverImgPixels[cover_y][cover_x + current_bit][@rgb[channel]])
+                        @coverImgPixels[cover_y][cover_x + current_bit][@rgb[channel]] += 1
                     end
                 elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[y][cover_x + current_bit][@rgb[channel]])
-                        @coverImgPixels[y][cover_x + current_bit][@rgb[channel]] -= 1
+                    if !isEvenNumber(@coverImgPixels[cover_y][cover_x + current_bit][@rgb[channel]])
+                        @coverImgPixels[cover_y][cover_x + current_bit][@rgb[channel]] -= 1
                     end
                 end
                 
@@ -107,6 +119,15 @@ module Stegno
             else
                 return binary
             end
+        end
+
+        def getXYfromNthPixel(n, width)
+            pixel_x = n % width
+            pixel_y = (n / width).floor
+
+            return {
+                x: pixel_x, y: pixel_y
+            }
         end
     end
 end
