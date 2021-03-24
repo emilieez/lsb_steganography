@@ -125,10 +125,6 @@ module Stegno
             end
         end
 
-        def getNthPixelFromXY(x, y, width)
-            return y*width + x
-        end
-
         def getXYfromNthPixel(n, width)
             pixel_x = n % width
             pixel_y = (n / width).floor
