@@ -40,16 +40,17 @@ module Stegno
             max_coverImg_y = @coverImg.height
             max_coverImg_x = @coverImg.width
             
-            decoded_pixels = []
+            decoded_pixels = [[]]
 
             current_r_bin = ""
             current_g_bin = ""
             current_b_bin = ""
 
             nth_cover_pix = 0
+            decoded_col_num = 0
+            decoded_row_num = 0
 
             (0..max_coverImg_y - 1).each{ |y|
-                decoded_pixels.push([])
                 (0..max_coverImg_x - 1).each{ |x|
 
                     current_r_bin += decodeLSBInPixelChannel('r', y, x)
@@ -61,7 +62,15 @@ module Stegno
                         g_value = current_g_bin.to_i(2)
                         b_value = current_b_bin.to_i(2)
 
-                        decoded_pixels[y].push([r_value, g_value, b_value])
+                        # TODO: change 128 to secret image width
+                        # Break loop when secret image height has been met
+                        if decoded_col_num >= 128
+                            decoded_row_num += 1
+                            decoded_pixels.push([])
+                            decoded_col_num = 0
+                        end
+                        decoded_pixels[decoded_row_num].push([r_value, g_value, b_value])
+                        decoded_col_num += 1
 
                         current_r_bin = ""
                         current_g_bin = ""

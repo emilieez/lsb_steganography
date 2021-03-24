@@ -33,10 +33,10 @@ end.parse!
 
 
 def checkImageSize(cover, secret) 
-    coverImgSize = cover.size
-    secretImgSize = secret.size
+    coverImgSize = cover.width * cover.height
+    secretImgSize = secret.width * secret.height
 
-    if cover.width < secret.width*8 || cover.height < secret.height*8
+    if coverImgSize < secretImgSize*8
         puts "Cover image is not big enough!"
         # exit(1)
     end
