@@ -10,7 +10,7 @@ module Stegno
 
             @secretImgPixels = @secretImg.get_pixels if @secretImg
             @coverImgPixels = @coverImg.get_pixels
-
+            
             @rgb = {
                 "r"=>0, "g"=>1, "b"=> 2
             }
@@ -46,40 +46,35 @@ module Stegno
             current_g_bin = ""
             current_b_bin = ""
 
-            nth_cover_pix = 0
-            decoded_col_num = 0
             decoded_row_num = 0
 
             (0..max_coverImg_y - 1).each{ |y|
                 (0..max_coverImg_x - 1).each{ |x|
-
                     current_r_bin += decodeLSBInPixelChannel('r', y, x)
                     current_g_bin += decodeLSBInPixelChannel('g', y, x)
                     current_b_bin += decodeLSBInPixelChannel('b', y, x)
 
-                    if nth_cover_pix % 8 == 7
+                    if current_r_bin.length && current_b_bin.length && current_g_bin.length == 8
                         r_value = current_r_bin.to_i(2)
                         g_value = current_g_bin.to_i(2)
                         b_value = current_b_bin.to_i(2)
 
                         # TODO: change 128 to secret image width
                         # Break loop when secret image height has been met
-                        if decoded_col_num >= 128
+                        if decoded_pixels[decoded_row_num].length == 221
                             decoded_row_num += 1
                             decoded_pixels.push([])
-                            decoded_col_num = 0
                         end
                         decoded_pixels[decoded_row_num].push([r_value, g_value, b_value])
-                        decoded_col_num += 1
 
                         current_r_bin = ""
                         current_g_bin = ""
                         current_b_bin = ""
                     end
-
-                    nth_cover_pix += 1
                 }
             }
+            decoded_pixels.pop() if decoded_pixels[-1].length != 221
+
             image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8 ,'png')
             image.write('output1.png')
         end
@@ -89,24 +84,24 @@ module Stegno
             binary = conver8BitBinary(value)
 
             nth_cover_pix = nth_secret_pix * 8
-            cover_pix_coordinates = getXYfromNthPixel(nth_cover_pix, @coverImg.width)
-            
-            cover_x = cover_pix_coordinates[:x]
-            cover_y = cover_pix_coordinates[:y]
 
-            current_bit = 0
             binary.each_char{ |b|
+                cover_pix_coordinates = getXYfromNthPixel(nth_cover_pix, @coverImg.width)
+
+                cover_x = cover_pix_coordinates[:x]
+                cover_y = cover_pix_coordinates[:y]
+
                 if b == '1'
-                    if isEvenNumber(@coverImgPixels[cover_y][cover_x + current_bit][@rgb[channel]])
-                        @coverImgPixels[cover_y][cover_x + current_bit][@rgb[channel]] += 1
+                    if isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
+                        @coverImgPixels[cover_y][cover_x][@rgb[channel]] += 1
                     end
                 elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[cover_y][cover_x + current_bit][@rgb[channel]])
-                        @coverImgPixels[cover_y][cover_x + current_bit][@rgb[channel]] -= 1
+                    if !isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
+                        @coverImgPixels[cover_y][cover_x][@rgb[channel]] -= 1
                     end
                 end
                 
-                current_bit += 1
+                nth_cover_pix += 1
             }
         end
 
@@ -128,6 +123,10 @@ module Stegno
             else
                 return binary
             end
+        end
+
+        def getNthPixelFromXY(x, y, width)
+            return y*width + x
         end
 
         def getXYfromNthPixel(n, width)
