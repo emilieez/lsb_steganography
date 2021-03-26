@@ -3,16 +3,74 @@ require 'mini_magick'
 module Stegno
     class DCImage
 
-        def initialize(coverImg, secretImg=nil, secretImgName=nil)
+        def initialize(coverImg, secretImg=nil, secretImgName=nil, secretImgFormat=nil, outputFile=nil, outputFormat=nil)
             @coverImg = coverImg
             @secretImg = secretImg
+
             @secretImgName = secretImgName
+            @secretImgFormat = secretImgFormat
+
+            @outputFile = outputFile
+            @outputFormat = outputFormat
 
             @secretImgPixels = @secretImg.get_pixels if @secretImg
             @coverImgPixels = @coverImg.get_pixels
-            
+
             @rgb = {
                 "r"=>0, "g"=>1, "b"=> 2
+            }
+
+            @decodedFilename = ""
+            @decodedFileFormat = ""
+            @decodedFileWidth = ""
+        end
+
+        def encodeSecretFileInfo
+            secretFileNameBinary = @secretImgName.unpack("B*")[0]
+            secretFileFormatBinary = @secretImgFormat.unpack("B*")[0]
+
+            secretFileWidthBinary = "#{@secretImg.width.to_s()};".unpack("B*")[0]
+
+            cover_x = 0
+            secretFileNameBinary.each_char{ |b|
+                if b == '1'
+                    if isEvenNumber(@coverImgPixels[0][cover_x][@rgb["r"]])
+                        @coverImgPixels[0][cover_x][@rgb["r"]] += 1
+                    end
+                elsif b == '0'
+                    if !isEvenNumber(@coverImgPixels[0][cover_x][@rgb["r"]])
+                       @coverImgPixels[0][cover_x][@rgb["r"]] -= 1
+                    end
+                end
+                cover_x += 1
+            }
+
+            cover_x = 0
+            secretFileFormatBinary.each_char{ |b|
+                if b == '1'
+                    if isEvenNumber(@coverImgPixels[0][cover_x][@rgb["g"]])
+                        @coverImgPixels[0][cover_x][@rgb["g"]] += 1
+                    end
+                elsif b == '0'
+                    if !isEvenNumber(@coverImgPixels[0][cover_x][@rgb["g"]])
+                       @coverImgPixels[0][cover_x][@rgb["g"]] -= 1
+                    end
+                end
+                cover_x += 1
+            }
+
+            cover_x = 0
+            secretFileWidthBinary.each_char{ |b|
+                if b == '1'
+                    if isEvenNumber(@coverImgPixels[0][cover_x][@rgb["b"]])
+                        @coverImgPixels[0][cover_x][@rgb["b"]] += 1
+                    end
+                elsif b == '0'
+                    if !isEvenNumber(@coverImgPixels[0][cover_x][@rgb["b"]])
+                       @coverImgPixels[0][cover_x][@rgb["b"]] -= 1
+                    end
+                end
+                cover_x += 1
             }
         end
 
@@ -32,8 +90,60 @@ module Stegno
                 }
             }
 
-            image = MiniMagick::Image.get_image_from_pixels(@coverImgPixels, [@coverImg.width, @coverImg.height], 'rgb', 8 ,'png')
-            image.write('output.png')
+            image = MiniMagick::Image.get_image_from_pixels(@coverImgPixels, [@coverImg.width, @coverImg.height], 'rgb', 8 , @outputFormat)
+            image.write("#{@outputFile}.#{@outputFormat}")
+
+        end
+
+        def decodeSecretFileInfo
+
+            filenameDone = false
+            formatDone = false
+            widthDone = false
+            
+            current_r_bin = ""
+            current_g_bin = ""
+            current_b_bin = ""
+
+
+            (0..@coverImg.width - 1).each{ |x|
+                current_r_bin += decodeLSBInPixelChannel('r', 0, x)
+                current_g_bin += decodeLSBInPixelChannel('g', 0, x)
+                current_b_bin += decodeLSBInPixelChannel('b', 0, x)
+
+                if current_r_bin.length && current_b_bin.length && current_g_bin.length == 8
+                    r_value = current_r_bin.to_i(2)
+                    g_value = current_g_bin.to_i(2)
+                    b_value = current_b_bin.to_i(2)
+                    
+
+                    if r_value.chr == ";" && !filenameDone
+                        filenameDone = true
+                    else
+                        @decodedFilename += r_value.chr
+                    end
+
+                    if g_value.chr == ";" && !formatDone
+                        formatDone = true
+                    else
+                        @decodedFileFormat += g_value.chr
+                    end
+
+                    if b_value.chr == ";" && !widthDone
+                        widthDone = true
+                    else
+                        @decodedFileWidth += b_value.chr
+                    end
+
+                    if filenameDone && formatDone && widthDone
+                        Break
+                    end
+
+                    current_r_bin = ""
+                    current_g_bin = ""
+                    current_b_bin = ""
+                end
+            }
         end
 
         def decodeImage
@@ -48,7 +158,7 @@ module Stegno
 
             decoded_row_num = 0
 
-            (0..max_coverImg_y - 1).each{ |y|
+            (1..max_coverImg_y - 1).each{ |y|
                 (0..max_coverImg_x - 1).each{ |x|
                     current_r_bin += decodeLSBInPixelChannel('r', y, x)
                     current_g_bin += decodeLSBInPixelChannel('g', y, x)
@@ -61,7 +171,7 @@ module Stegno
 
                         # TODO: change 128 to secret image width
                         # Break loop when secret image height has been met
-                        if decoded_pixels[decoded_row_num].length == 221
+                        if decoded_pixels[decoded_row_num].length == @decodedFileWidth.to_i
                             decoded_row_num += 1
                             decoded_pixels.push([])
                         end
@@ -73,10 +183,10 @@ module Stegno
                     end
                 }
             }
-            decoded_pixels.pop() if decoded_pixels[-1].length != 221
+            decoded_pixels.pop() if decoded_pixels[-1].length != @decodedFileWidth.to_i
 
             image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8 ,'png')
-            image.write('output1.png')
+            image.write("decoded.png")
         end
 
         def encodeLSBInPixelChannel(channel, y, x, nth_secret_pix)
@@ -89,7 +199,7 @@ module Stegno
                 cover_pix_coordinates = getXYfromNthPixel(nth_cover_pix, @coverImg.width)
 
                 cover_x = cover_pix_coordinates[:x]
-                cover_y = cover_pix_coordinates[:y]
+                cover_y = cover_pix_coordinates[:y] + 1
 
                 if b == '1'
                     if isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])

@@ -8,7 +8,9 @@ options = {
     mode: nil,
     coverImg: nil,
     secretImg: nil,
-    output: nil
+    output: nil,
+    outputFormat: nil,
+    key: nil
 }
 
 OptionParser.new do |opts|
@@ -24,19 +26,28 @@ OptionParser.new do |opts|
         options[:secretImg] = secretImg
     end
 
-    opts.on("-o", "--output output.bmp", String, "Output image. Can be any valid image format") do |output|
+    opts.on("-o", "--output filename", String, "Output image. Can be any valid image format") do |output|
         options[:output] = output
+    end
+
+    opts.on("-f", "--format bmp", String, "Output image. Can be any valid image format") do |outputFormat|
+        options[:outputFormat] = outputFormat
+    end
+
+    opts.on("-k", "--key 1234", String, "Numbers only") do |output|
+        options[:key] = output
     end
 
 end.parse!
 
 
 
-def checkImageSize(cover, secret) 
-    coverImgSize = cover.width * cover.height
+def checkImageSize(cover, secret, secretFileName) 
+    coverImgSize = cover.width * (cover.height - 2)
+
     secretImgSize = secret.width * secret.height
 
-    if coverImgSize < secretImgSize*8 || cover.size < secret.size*8
+    if coverImgSize < secretImgSize*8 || cover.size < secret.size*8 || cover.width < secretFileName.length * 8
         puts "Cover image is not big enough!"
         exit(1)
     end
@@ -50,10 +61,10 @@ begin
 
     if options[:mode] == "encode"
         secretImg = MiniMagick::Image.open(options[:secretImg])
-        checkImageSize(coverImg, secretImg)
+        checkImageSize(coverImg, secretImg, options[:secretImg])
     end
     
-    stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], secretImg, "testImage")
+    stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], options[:key], secretImg, options[:secretImg], options[:output], options[:outputFormat])
     stegno_applicaton.start
 end
 
