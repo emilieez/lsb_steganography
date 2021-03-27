@@ -11,7 +11,7 @@ options = {
     secretImg: nil,
     output: nil,
     outputFormat: nil,
-    key: nil
+    blowfishKey: nil
 }
 
 OptionParser.new do |opts|
@@ -31,8 +31,8 @@ OptionParser.new do |opts|
         options[:output] = output
     end
 
-    opts.on("-k", "--key foobar", String, "Encryption key. Use either ONLY numbers or ONLY text") do |output|
-        options[:key] = output
+    opts.on("--blowfish foobar", String, "Encryption blowfishKey. Use either ONLY numbers or ONLY text") do |blowfishKey|
+        options[:blowfishKey] = blowfishKey
     end
 
 end.parse!
@@ -60,7 +60,7 @@ begin
         secretImg = MiniMagick::Image.open(options[:secretImg])
         checkImageSize(coverImg, secretImg, options[:secretImg])
     end
-    stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], options[:key], secretImg, options[:secretImg], options[:output])
+    stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], options[:blowfishKey], secretImg, options[:secretImg], options[:output])
     stegno_applicaton.start
 end
 
