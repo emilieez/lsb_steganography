@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+echo
+echo
+echo
+echo "LSB Steganography Application"
+
+echo "Enter 'e' for Encode or 'd' for Decode"
+read res
+
+if [ "$res" == "e"  ] || [ "$res" == "E" ]; then
+    export MODE="encode"
+    export BLOWFISH_MODE="Encryption"
+    export CAESAR_MODE="Encipher"
+elif [ "$res" == "d"  ] || [ "$res" == "D" ]; then
+    export MODE="decode"
+    export BLOWFISH_MODE="Decryption"
+    export CAESAR_MODE="Decipher"
+else
+    echo "Invalid response - please only type 'e' or 'd'. Exiting ..."
+    exit
+fi
+
+echo
+echo
+echo
+
+echo "Cover Image: "
+read res
+if [[ -f "$res" ]]; then
+    export COVER_IMG=$res
+else
+    echo "Image does not exist. Exiting ..."
+    exit
+fi
+
+echo
+
+if [ "$MODE" == "encode" ]; then
+    echo "Secret Image: "
+    read res
+
+    if [[ -f "$res" ]]; then
+        export SECRET_IMG="-s $res"
+    else
+        echo "Image does not exist. Exiting ..."
+        exit
+    fi
+fi
+
+
+echo
+
+echo "Save result image as: "
+read res
+export OUTPUT_IMG=$res
+
+echo
+
+echo "$BLOWFISH_MODE key: "
+read res
+export BLOWFISH_KEY=$res
+
+echo
+
+echo "$CAESAR_MODE key: "
+read res
+export CAESAR_KEY=$res
+
+ruby dcstegno.rb -c $COVER_IMG $SECRET_IMG -o $OUTPUT_IMG -m $MODE --blowfish $BLOWFISH_KEY --caesar $CAESAR_KEY
