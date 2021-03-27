@@ -67,4 +67,6 @@ echo "$CAESAR_MODE key: "
 read res
 export CAESAR_KEY=$res
 
+echo
+echo
 ruby dcstegno.rb -c $COVER_IMG $SECRET_IMG -o $OUTPUT_IMG -m $MODE --blowfish $BLOWFISH_KEY --caesar $CAESAR_KEY
