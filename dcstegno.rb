@@ -35,9 +35,7 @@ OptionParser.new do |opts|
     opts.on("-s", "--secret-img secret.bmp", String, "[Required in ENCODE mode] Secret image to be encoded in cover image. Can be any valid image format") do |secretImg|
     options[:secretImg] = secretImg
     end
-
 end.parse!
-
 
 
 def checkImageSize(cover, secret, secretFileName) 
@@ -58,8 +56,19 @@ def checkImageSize(cover, secret, secretFileName)
 end
 
 
+def validateArguments(options)
+    raise "Missing Required Argument: -m, --mode" if options[:mode].nil?
+    raise "Missing Required Argument: -c, --cover-img" if options[:coverImg].nil?
+    raise "Missing Required Argument: -o, --output" if options[:output].nil?
+    raise "Missing Required Argument: --blowfish" if options[:blowfishKey].nil?
+    raise "Missing Required Argument: --caesar" if options[:caesarKey].nil?
+    raise "Missing Required Argument: -s, --secret-img" if options[:secretImg].nil? && options[:mode] == "encode"
+end
+
 
 begin
+    validateArguments(options)
+
     coverImg = MiniMagick::Image.open(options[:coverImg])
     secretImg = nil;
 
