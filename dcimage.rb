@@ -36,6 +36,8 @@ module Stegno
             encodeSecretBinary(secretFileNameBinary, 'r')
             encodeSecretBinary(secretFileFormatBinary, 'g')
             encodeSecretBinary(secretFileWidthBinary, 'b')
+
+            puts "Encrypted secret filename to \"#{@secretImgName}\""
         end
 
         def encodeSecretBinary(bin, channel)
@@ -64,7 +66,7 @@ module Stegno
 
             image = MiniMagick::Image.get_image_from_pixels(@coverImgPixels, [@coverImg.width, @coverImg.height], 'rgb', 8 , @outputFormat)
             image.write("outputs/#{@outputFile}.#{@outputFormat}")
-            puts "Encoded cover image > outputs/#{@outputFile}.#{@outputFormat}"
+            puts "Encoded cover image to outputs/#{@outputFile}.#{@outputFormat}"
 
         end
 
