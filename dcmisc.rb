@@ -1,5 +1,9 @@
 module Stegno
+    
+    BIN_CAESAR_ARRAY = (0..255).to_a
+
     class DCMisc
+
         def self.getImgInfo(imgFilePath)
             imgFile = imgFilePath.split("/")[-1]
             name = imgFile.split('.')[0]
@@ -9,6 +13,10 @@ module Stegno
                 name: name,
                 extension: extension
             }
+        end
+
+        def getCaesarShifted(num, shift)
+            return BIN_CAESAR_ARRAY[num + shift]
         end
         
         def self.isEvenNumber(num)
