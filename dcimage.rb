@@ -118,7 +118,6 @@ module Stegno
                 end
             }
 
-             puts @decodedFileFormat
             decrypted_secretImgName = Stegno::DCMisc.blowfishDecrypt(@decodedFilename, @blowfishKey)
             puts "Found secret image: #{decrypted_secretImgName}.#{@decodedFileFormat}"
         end
@@ -129,39 +128,36 @@ module Stegno
             
             decoded_pixels = [[]]
 
-            current_r_bin = ""
-            current_g_bin = ""
-            current_b_bin = ""
+            rgb_bins = { r: "", g: "", b: "" }
 
-            decoded_row_num = 0
+            decoded_y_idx = 0
 
             secretImg_width = @decodedFileDimension.split(",")[0]
             secretImg_height = @decodedFileDimension.split(",")[1]
 
             (1..max_coverImg_y - 1).each{ |y|
                 (0..max_coverImg_x - 1).each{ |x|
-                    current_r_bin += decodeLSBInPixelChannel('r', y, x)
-                    current_g_bin += decodeLSBInPixelChannel('g', y, x)
-                    current_b_bin += decodeLSBInPixelChannel('b', y, x)
+                    rgb_bins[:r] += decodeLSBInPixelChannel('r', y, x)
+                    rgb_bins[:g] += decodeLSBInPixelChannel('g', y, x)
+                    rgb_bins[:b] += decodeLSBInPixelChannel('b', y, x)
 
-                    if current_r_bin.length && current_b_bin.length && current_g_bin.length == 8
+                    if rgb_bins[:r].length && rgb_bins[:g].length && rgb_bins[:b].length == 8
 
-                        r_value = Stegno::DCMisc.getCaesarShiftedInt(current_r_bin.to_i(2), @caesarKey)
-                        g_value = Stegno::DCMisc.getCaesarShiftedInt(current_g_bin.to_i(2), @caesarKey)
-                        b_value = Stegno::DCMisc.getCaesarShiftedInt(current_b_bin.to_i(2), @caesarKey)
+                        r_value = Stegno::DCMisc.getCaesarShiftedInt(rgb_bins[:r].to_i(2), @caesarKey)
+                        g_value = Stegno::DCMisc.getCaesarShiftedInt(rgb_bins[:g].to_i(2), @caesarKey)
+                        b_value = Stegno::DCMisc.getCaesarShiftedInt(rgb_bins[:b].to_i(2), @caesarKey)
 
-                        if decoded_pixels[decoded_row_num].length == secretImg_width.to_i
-                            decoded_row_num += 1
+                        if decoded_pixels[decoded_y_idx].length == secretImg_width.to_i
+                            decoded_y_idx += 1
                             decoded_pixels.push([])
                         end
-                        decoded_pixels[decoded_row_num].push([r_value, g_value, b_value])
-
-                        current_r_bin = ""
-                        current_g_bin = ""
-                        current_b_bin = ""
+                        decoded_pixels[decoded_y_idx].push([r_value, g_value, b_value])
+                        rgb_bins = { r: "", g: "", b: "" }
                     end
                 }
             }
+
+            # Trim extra pixels if it doesn't match the secret image width
             decoded_pixels.pop() if decoded_pixels[-1].length != secretImg_width.to_i
             decoded_pixels = decoded_pixels[0..secretImg_height.to_i - 1]
 
