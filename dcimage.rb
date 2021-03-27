@@ -25,13 +25,13 @@ module Stegno
 
             @decodedFilename = ""
             @decodedFileFormat = ""
-            @decodedFileWidth = ""
+            @decodedFileDimension = ""
         end
 
         def encodeSecretFileInfo
             secretFileNameBinary = @secretImgName.unpack("B*")[0]
             secretFileFormatBinary = @secretImgFormat.unpack("B*")[0]
-            secretFileWidthBinary = "#{@secretImg.width.to_s()}/".unpack("B*")[0]
+            secretFileWidthBinary = "#{@secretImg.width.to_s()},#{@secretImg.height.to_s()}/".unpack("B*")[0]
 
             encodeSecretBinary(secretFileNameBinary, 'r')
             encodeSecretBinary(secretFileFormatBinary, 'g')
@@ -72,7 +72,7 @@ module Stegno
 
             filenameDone = false
             formatDone = false
-            widthDone = false
+            dimensionDone = false
             
             current_r_bin = ""
             current_g_bin = ""
@@ -101,13 +101,13 @@ module Stegno
                         @decodedFileFormat += g_value.chr
                     end
 
-                    if b_value.chr == "/" && !widthDone
-                        widthDone = true
+                    if b_value.chr == "/" && !dimensionDone
+                        dimensionDone = true
                     else
-                        @decodedFileWidth += b_value.chr
+                        @decodedFileDimension += b_value.chr
                     end
 
-                    if filenameDone && formatDone && widthDone
+                    if filenameDone && formatDone && dimensionDone
                         Break
                     end
 
@@ -134,6 +134,9 @@ module Stegno
 
             decoded_row_num = 0
 
+            secretImg_width = @decodedFileDimension.split(",")[0]
+            secretImg_height = @decodedFileDimension.split(",")[1]
+
             (1..max_coverImg_y - 1).each{ |y|
                 (0..max_coverImg_x - 1).each{ |x|
                     current_r_bin += decodeLSBInPixelChannel('r', y, x)
@@ -146,7 +149,7 @@ module Stegno
                         g_value = Stegno::DCMisc.getCaesarShiftedInt(current_g_bin.to_i(2), @caesarKey)
                         b_value = Stegno::DCMisc.getCaesarShiftedInt(current_b_bin.to_i(2), @caesarKey)
 
-                        if decoded_pixels[decoded_row_num].length == @decodedFileWidth.to_i
+                        if decoded_pixels[decoded_row_num].length == secretImg_width.to_i
                             decoded_row_num += 1
                             decoded_pixels.push([])
                         end
@@ -158,7 +161,8 @@ module Stegno
                     end
                 }
             }
-            decoded_pixels.pop() if decoded_pixels[-1].length != @decodedFileWidth.to_i
+            decoded_pixels.pop() if decoded_pixels[-1].length != secretImg_width.to_i
+            decoded_pixels = decoded_pixels[0..secretImg_height.to_i - 1]
 
             image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8, @outputFormat)
             
