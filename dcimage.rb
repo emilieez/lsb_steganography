@@ -28,24 +28,17 @@ module Stegno
         def encodeSecretFileInfo
             secretFileNameBinary = @secretImgName.unpack("B*")[0]
             secretFileFormatBinary = @secretImgFormat.unpack("B*")[0]
-
             secretFileWidthBinary = "#{@secretImg.width.to_s()};".unpack("B*")[0]
 
-            cover_x = 0
-            secretFileNameBinary.each_char{ |b|
-                flipLSBInCoverImg(b, 0, cover_x, 'r')
-                cover_x += 1
-            }
+            encodeSecretBinary(secretFileNameBinary, 'r')
+            encodeSecretBinary(secretFileFormatBinary, 'g')
+            encodeSecretBinary(secretFileWidthBinary, 'b')
+        end
 
+        def encodeSecretBinary(bin, channel)
             cover_x = 0
-            secretFileFormatBinary.each_char{ |b|
-                flipLSBInCoverImg(b, 0, cover_x, 'g')
-                cover_x += 1
-            }
-
-            cover_x = 0
-            secretFileWidthBinary.each_char{ |b|
-                flipLSBInCoverImg(b, 0, cover_x, 'b')
+            bin.each_char{ |b|
+                flipLSBInCoverImg(b, 0, cover_x, channel)
                 cover_x += 1
             }
         end
