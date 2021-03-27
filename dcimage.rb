@@ -68,6 +68,25 @@ module Stegno
 
         end
 
+        def encodeLSBInPixelChannel(channel, y, x, nth_secret_pix)
+            value = @secretImgPixels[y][x][@rgb[channel]]
+            ciphered_value = Stegno::DCMisc.getCaesarShiftedInt(value, @caesarKey)
+            binary = Stegno::DCMisc.conver8BitBinary(ciphered_value)
+
+            nth_cover_pix = nth_secret_pix * 8
+
+            binary.each_char{ |b|
+                cover_pix_coordinates = Stegno::DCMisc.getXYfromNthPixel(nth_cover_pix, @coverImg.width)
+
+                cover_x = cover_pix_coordinates[:x]
+                cover_y = cover_pix_coordinates[:y] + 1
+
+                flipLSBInCoverImg(b, cover_y, cover_x, channel)
+                
+                nth_cover_pix += 1
+            }
+        end
+
         def decodeSecretFileInfo
 
             filenameDone = false
@@ -161,25 +180,6 @@ module Stegno
             
             image.write("outputs/#{@outputFile}.#{@outputFormat}")
             puts "Outputted secret image to outputs/#{@outputFile}.#{@outputFormat}"
-        end
-
-        def encodeLSBInPixelChannel(channel, y, x, nth_secret_pix)
-            value = @secretImgPixels[y][x][@rgb[channel]]
-            ciphered_value = Stegno::DCMisc.getCaesarShiftedInt(value, @caesarKey)
-            binary = Stegno::DCMisc.conver8BitBinary(ciphered_value)
-
-            nth_cover_pix = nth_secret_pix * 8
-
-            binary.each_char{ |b|
-                cover_pix_coordinates = Stegno::DCMisc.getXYfromNthPixel(nth_cover_pix, @coverImg.width)
-
-                cover_x = cover_pix_coordinates[:x]
-                cover_y = cover_pix_coordinates[:y] + 1
-
-                flipLSBInCoverImg(b, cover_y, cover_x, channel)
-                
-                nth_cover_pix += 1
-            }
         end
 
         def flipLSBInCoverImg(b, cover_y, cover_x, channel)
