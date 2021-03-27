@@ -162,8 +162,8 @@ module Stegno
 
             image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8, @outputFormat)
             
-            puts "Outputted secret image to #{@outputFile}.#{@outputFormat}"
             image.write("#{@outputFile}.#{@outputFormat}")
+            puts "Outputted secret image to #{@outputFile}.#{@outputFormat}"
         end
 
         def encodeLSBInPixelChannel(channel, y, x, nth_secret_pix)
