@@ -1,5 +1,4 @@
 require 'optparse'
-require 'fastimage'
 
 require_relative 'dcimage.rb'
 require_relative 'dcutils.rb'

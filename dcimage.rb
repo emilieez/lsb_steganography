@@ -31,11 +31,11 @@ module Stegno
         def encodeSecretFileInfo
             secretFileNameBinary = @secretImgName.unpack("B*")[0]
             secretFileFormatBinary = @secretImgFormat.unpack("B*")[0]
-            secretFileWidthBinary = "#{@secretImg.width.to_s()},#{@secretImg.height.to_s()}#{Stegno::EOL_SYMBOL}".unpack("B*")[0]
+            secretFileDimensionBinary = "#{@secretImg.width.to_s()},#{@secretImg.height.to_s()}#{Stegno::EOL_SYMBOL}".unpack("B*")[0]
 
             encodeSecretBinary(secretFileNameBinary, 'r')
             encodeSecretBinary(secretFileFormatBinary, 'g')
-            encodeSecretBinary(secretFileWidthBinary, 'b')
+            encodeSecretBinary(secretFileDimensionBinary, 'b')
 
             puts "Encrypted secret filename to \"#{@secretImgName}\""
         end
