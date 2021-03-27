@@ -41,12 +41,19 @@ end.parse!
 
 
 def checkImageSize(cover, secret, secretFileName) 
-    coverImgSize = cover.width * (cover.height - 2)
+    availableCoverImgPixels = cover.width * (cover.height - 1)
+    
+    secretImgPixels = secret.width * secret.height
+    secretFilenameLength = "#{secretFileName}/".length
+    secretDimensionsLength = "#{secret.width},#{secret.height}/".length
 
-    secretImgSize = secret.width * secret.height
+    requiredCoverImgPixels = secretImgPixels*8
+    requiredCoverImgWidth = secretFilenameLength >= secretDimensionsLength ? secretFilenameLength*8 : secretDimensionsLength*8
+    requiredCoverImgSize = secret.size*8
 
-    if coverImgSize < secretImgSize*8 || cover.size < secret.size*8 || cover.width < secretFileName.length * 8
+    if cover.size < requiredCoverImgSize || availableCoverImgPixels < requiredCoverImgPixels || cover.width < requiredCoverImgWidth
         puts "Cover image is not big enough!"
+        puts "Cover image requires minimum of #{requiredCoverImgPixels} Pixels, #{requiredCoverImgWidth}w, #{requiredCoverImgSize} bytes"
         exit(1)
     end
 end
@@ -59,7 +66,8 @@ begin
 
     if options[:mode] == "encode"
         secretImg = MiniMagick::Image.open(options[:secretImg])
-        checkImageSize(coverImg, secretImg, options[:secretImg])
+        secretImgInfo = Stegno::DCMisc.getImgInfo(options[:secretImg])
+        checkImageSize(coverImg, secretImg, secretImgInfo[:name])
     end
     stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], options[:blowfishKey], options[:caesarKey], secretImg, options[:secretImg], options[:output])
     stegno_applicaton.start
