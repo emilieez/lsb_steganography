@@ -19,8 +19,12 @@ OptionParser.new do |opts|
         options[:coverImg] = coverImg
     end
 
-    opts.on("-o", "--output filename", String, "[Required] Output image. Can be any lossless image format (e.g no jpg/jpeg") do |output|
+    opts.on("-o", "--output filename", String, "[Required] Output image. Can be any lossless image format (e.g no jpg/jpeg)") do |output|
         options[:output] = output
+    end
+
+    opts.on("-s", "--secret-img secret.bmp", String, "[Required in ENCODE mode] Secret image to be encoded in cover image.") do |secretImg|
+        options[:secretImg] = secretImg
     end
 
     opts.on("--blowfish foobar", String, "[Required] Blowfish Encryption key.") do |blowfishKey|
@@ -29,10 +33,6 @@ OptionParser.new do |opts|
 
     opts.on("--caesar 3", Integer, "[Required] Caesor Cipher shift.") do |caesarKey|
         options[:caesarKey] = caesarKey
-    end
-
-    opts.on("-s", "--secret-img secret.bmp", String, "[Required in ENCODE mode] Secret image to be encoded in cover image. Can be any valid image format") do |secretImg|
-    options[:secretImg] = secretImg
     end
 end.parse!
 

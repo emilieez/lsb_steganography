@@ -25,6 +25,11 @@ module Stegno
             secretImgInfo = Stegno::DCMisc.getImgInfo(@secretImgName)
             outputImgInfo = Stegno::DCMisc.getImgInfo(@outputFile)
 
+            if outputImgInfo[:extension] == "jpg" || outputImgInfo[:extension] == "jpeg"
+                puts "Cannot use jpg/jpeg format as encoded output!"
+                exit(1)
+            end
+
             encrypted_secretImgName = Stegno::DCMisc.blowfishEncrypt(secretImgInfo[:name], @blowfishKey) + Stegno::EOL_SYMBOL
 
             dcImage = Stegno::DCImage.new(@coverImg, outputImgInfo[:name], outputImgInfo[:extension], @blowfishKey, @caesarKey, @secretImg, encrypted_secretImgName, secretImgInfo[:extension]+Stegno::EOL_SYMBOL)
