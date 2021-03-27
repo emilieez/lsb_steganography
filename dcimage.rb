@@ -160,12 +160,12 @@ module Stegno
 
         def encodeLSBInPixelChannel(channel, y, x, nth_secret_pix)
             value = @secretImgPixels[y][x][@rgb[channel]]
-            binary = conver8BitBinary(value)
+            binary = Stegno::DCMisc.conver8BitBinary(value)
 
             nth_cover_pix = nth_secret_pix * 8
 
             binary.each_char{ |b|
-                cover_pix_coordinates = getXYfromNthPixel(nth_cover_pix, @coverImg.width)
+                cover_pix_coordinates = Stegno::DCMisc.getXYfromNthPixel(nth_cover_pix, @coverImg.width)
 
                 cover_x = cover_pix_coordinates[:x]
                 cover_y = cover_pix_coordinates[:y] + 1
@@ -178,11 +178,11 @@ module Stegno
 
         def flipLSBInCoverImg(b, cover_y, cover_x, channel)
             if b == '1'
-                if isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
+                if Stegno::DCMisc.isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
                     @coverImgPixels[cover_y][cover_x][@rgb[channel]] += 1
                 end
             elsif b == '0'
-                if !isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
+                if !Stegno::DCMisc.isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
                     @coverImgPixels[cover_y][cover_x][@rgb[channel]] -= 1
                 end
             end
@@ -190,31 +190,9 @@ module Stegno
 
         def decodeLSBInPixelChannel(channel, y, x)
             value = @coverImgPixels[y][x][@rgb[channel]]
-            binary = conver8BitBinary(value)
+            binary = Stegno::DCMisc.conver8BitBinary(value)
             return binary[7]
         end
-
-        def isEvenNumber(num)
-            return num % 2 == 0
-        end
-
-        def conver8BitBinary(num)
-            binary = num.to_s(2)
-            if binary.length < 8
-                zeros = '0' * (8 - binary.length)
-                return zeros + binary
-            else
-                return binary
-            end
-        end
-
-        def getXYfromNthPixel(n, width)
-            pixel_x = n % width
-            pixel_y = (n / width).floor
-
-            return {
-                x: pixel_x, y: pixel_y
-            }
-        end
+        
     end
 end
