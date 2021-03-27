@@ -3,7 +3,7 @@ require 'mini_magick'
 module Stegno
     class DCImage
 
-        def initialize(coverImg, outputFile, outputFormat, secretImg=nil, secretImgName=nil, secretImgFormat=nil)
+        def initialize(coverImg, outputFile, outputFormat, key, secretImg=nil, secretImgName=nil, secretImgFormat=nil)
             @coverImg = coverImg
             @secretImg = secretImg
 
@@ -19,6 +19,8 @@ module Stegno
             @rgb = {
                 "r"=>0, "g"=>1, "b"=> 2
             }
+
+            @key = key
 
             @decodedFilename = ""
             @decodedFileFormat = ""
@@ -113,7 +115,7 @@ module Stegno
                     current_b_bin = ""
                 end
             }
-            key = Blowfish::Key.generate("foobar")
+            key = Blowfish::Key.generate(@key)
             decrypted_secretImgName = Blowfish.decrypt(@decodedFilename, key)
             foundSecret = decrypted_secretImgName[0..decrypted_secretImgName.index('/') - 1]
             puts "Found secret image: #{foundSecret}.#{@decodedFileFormat}"
