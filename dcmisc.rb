@@ -17,7 +17,7 @@ module Stegno
 
         def self.getCaesarShiftedInt(num, shift)
             result = num + shift
-            result = (result % 255)if result > 255
+            result = ((result % 255) - 1) if result > 255
             return CAESAR_ARRAY[result]
         end
         
