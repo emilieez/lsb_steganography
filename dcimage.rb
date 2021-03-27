@@ -31,7 +31,7 @@ module Stegno
         def encodeSecretFileInfo
             secretFileNameBinary = @secretImgName.unpack("B*")[0]
             secretFileFormatBinary = @secretImgFormat.unpack("B*")[0]
-            secretFileWidthBinary = "#{@secretImg.width.to_s()},#{@secretImg.height.to_s()}/".unpack("B*")[0]
+            secretFileWidthBinary = "#{@secretImg.width.to_s()},#{@secretImg.height.to_s()}#{Stegno::EOL_SYMBOL}".unpack("B*")[0]
 
             encodeSecretBinary(secretFileNameBinary, 'r')
             encodeSecretBinary(secretFileFormatBinary, 'g')
@@ -109,19 +109,19 @@ module Stegno
                     b_value =  rgb_bins[:b].to_i(2)
                     
                     # puts Stegno::DCMisc.blowfishDecrypt(r_value.chr, @blowfishKey)
-                    if r_value.chr == "/" && !filenameDone
+                    if r_value.chr == Stegno::EOL_SYMBOL && !filenameDone
                         filenameDone = true
                     elsif !filenameDone
                         @decodedFilename += r_value.chr
                     end
 
-                    if g_value.chr == "/" && !formatDone
+                    if g_value.chr == Stegno::EOL_SYMBOL && !formatDone
                         formatDone = true
                     elsif !formatDone
                         @decodedFileFormat += g_value.chr
                     end
 
-                    if b_value.chr == "/" && !dimensionDone
+                    if b_value.chr == Stegno::EOL_SYMBOL && !dimensionDone
                         dimensionDone = true
                     elsif !dimensionDone
                         @decodedFileDimension += b_value.chr

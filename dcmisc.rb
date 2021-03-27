@@ -1,6 +1,7 @@
 module Stegno
     
     CAESAR_ARRAY = (0..255).to_a
+    EOL_SYMBOL = "/"
 
     class DCMisc
 

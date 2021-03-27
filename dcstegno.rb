@@ -44,8 +44,8 @@ def checkImageSize(cover, secret, secretFileName)
     availableCoverImgPixels = cover.width * (cover.height - 1)
     
     secretImgPixels = secret.width * secret.height
-    secretFilenameLength = "#{secretFileName}/".length
-    secretDimensionsLength = "#{secret.width},#{secret.height}/".length
+    secretFilenameLength = "#{secretFileName}#{Stegno::EOL_SYMBOL}".length
+    secretDimensionsLength = "#{secret.width},#{secret.height}#{Stegno::EOL_SYMBOL}".length
 
     requiredCoverImgPixels = secretImgPixels*8
     requiredCoverImgWidth = secretFilenameLength >= secretDimensionsLength ? secretFilenameLength*8 : secretDimensionsLength*8
