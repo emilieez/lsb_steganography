@@ -3,7 +3,7 @@ require 'mini_magick'
 module Stegno
     class DCImage
 
-        def initialize(coverImg, secretImg=nil, secretImgName=nil, secretImgFormat=nil, outputFile=nil, outputFormat=nil)
+        def initialize(coverImg, outputFile, outputFormat, key, secretImg=nil, secretImgName=nil, secretImgFormat=nil)
             @coverImg = coverImg
             @secretImg = secretImg
 
@@ -20,6 +20,8 @@ module Stegno
                 "r"=>0, "g"=>1, "b"=> 2
             }
 
+            @key = key
+
             @decodedFilename = ""
             @decodedFileFormat = ""
             @decodedFileWidth = ""
@@ -28,48 +30,17 @@ module Stegno
         def encodeSecretFileInfo
             secretFileNameBinary = @secretImgName.unpack("B*")[0]
             secretFileFormatBinary = @secretImgFormat.unpack("B*")[0]
+            secretFileWidthBinary = "#{@secretImg.width.to_s()}/".unpack("B*")[0]
 
-            secretFileWidthBinary = "#{@secretImg.width.to_s()};".unpack("B*")[0]
+            encodeSecretBinary(secretFileNameBinary, 'r')
+            encodeSecretBinary(secretFileFormatBinary, 'g')
+            encodeSecretBinary(secretFileWidthBinary, 'b')
+        end
 
+        def encodeSecretBinary(bin, channel)
             cover_x = 0
-            secretFileNameBinary.each_char{ |b|
-                if b == '1'
-                    if isEvenNumber(@coverImgPixels[0][cover_x][@rgb["r"]])
-                        @coverImgPixels[0][cover_x][@rgb["r"]] += 1
-                    end
-                elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[0][cover_x][@rgb["r"]])
-                       @coverImgPixels[0][cover_x][@rgb["r"]] -= 1
-                    end
-                end
-                cover_x += 1
-            }
-
-            cover_x = 0
-            secretFileFormatBinary.each_char{ |b|
-                if b == '1'
-                    if isEvenNumber(@coverImgPixels[0][cover_x][@rgb["g"]])
-                        @coverImgPixels[0][cover_x][@rgb["g"]] += 1
-                    end
-                elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[0][cover_x][@rgb["g"]])
-                       @coverImgPixels[0][cover_x][@rgb["g"]] -= 1
-                    end
-                end
-                cover_x += 1
-            }
-
-            cover_x = 0
-            secretFileWidthBinary.each_char{ |b|
-                if b == '1'
-                    if isEvenNumber(@coverImgPixels[0][cover_x][@rgb["b"]])
-                        @coverImgPixels[0][cover_x][@rgb["b"]] += 1
-                    end
-                elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[0][cover_x][@rgb["b"]])
-                       @coverImgPixels[0][cover_x][@rgb["b"]] -= 1
-                    end
-                end
+            bin.each_char{ |b|
+                flipLSBInCoverImg(b, 0, cover_x, channel)
                 cover_x += 1
             }
         end
@@ -92,6 +63,7 @@ module Stegno
 
             image = MiniMagick::Image.get_image_from_pixels(@coverImgPixels, [@coverImg.width, @coverImg.height], 'rgb', 8 , @outputFormat)
             image.write("#{@outputFile}.#{@outputFormat}")
+            puts "Encoded cover image > #{@outputFile}.#{@outputFormat}"
 
         end
 
@@ -116,20 +88,19 @@ module Stegno
                     g_value = current_g_bin.to_i(2)
                     b_value = current_b_bin.to_i(2)
                     
-
-                    if r_value.chr == ";" && !filenameDone
+                    if r_value.chr == "/" && !filenameDone
                         filenameDone = true
                     else
                         @decodedFilename += r_value.chr
                     end
 
-                    if g_value.chr == ";" && !formatDone
+                    if g_value.chr == "/" && !formatDone
                         formatDone = true
                     else
                         @decodedFileFormat += g_value.chr
                     end
 
-                    if b_value.chr == ";" && !widthDone
+                    if b_value.chr == "/" && !widthDone
                         widthDone = true
                     else
                         @decodedFileWidth += b_value.chr
@@ -144,6 +115,10 @@ module Stegno
                     current_b_bin = ""
                 end
             }
+            key = Blowfish::Key.generate(@key)
+            decrypted_secretImgName = Blowfish.decrypt(@decodedFilename, key)
+            foundSecret = decrypted_secretImgName[0..decrypted_secretImgName.index('/') - 1]
+            puts "Found secret image: #{foundSecret}.#{@decodedFileFormat}"
         end
 
         def decodeImage
@@ -169,8 +144,6 @@ module Stegno
                         g_value = current_g_bin.to_i(2)
                         b_value = current_b_bin.to_i(2)
 
-                        # TODO: change 128 to secret image width
-                        # Break loop when secret image height has been met
                         if decoded_pixels[decoded_row_num].length == @decodedFileWidth.to_i
                             decoded_row_num += 1
                             decoded_pixels.push([])
@@ -185,63 +158,47 @@ module Stegno
             }
             decoded_pixels.pop() if decoded_pixels[-1].length != @decodedFileWidth.to_i
 
-            image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8 ,'png')
-            image.write("decoded.png")
+            image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8, @outputFormat)
+            
+            puts "Outputted secret image to #{@outputFile}.#{@outputFormat}"
+            image.write("#{@outputFile}.#{@outputFormat}")
         end
 
         def encodeLSBInPixelChannel(channel, y, x, nth_secret_pix)
             value = @secretImgPixels[y][x][@rgb[channel]]
-            binary = conver8BitBinary(value)
+            binary = Stegno::DCMisc.conver8BitBinary(value)
 
             nth_cover_pix = nth_secret_pix * 8
 
             binary.each_char{ |b|
-                cover_pix_coordinates = getXYfromNthPixel(nth_cover_pix, @coverImg.width)
+                cover_pix_coordinates = Stegno::DCMisc.getXYfromNthPixel(nth_cover_pix, @coverImg.width)
 
                 cover_x = cover_pix_coordinates[:x]
                 cover_y = cover_pix_coordinates[:y] + 1
 
-                if b == '1'
-                    if isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
-                        @coverImgPixels[cover_y][cover_x][@rgb[channel]] += 1
-                    end
-                elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
-                        @coverImgPixels[cover_y][cover_x][@rgb[channel]] -= 1
-                    end
-                end
+                flipLSBInCoverImg(b, cover_y, cover_x, channel)
                 
                 nth_cover_pix += 1
             }
         end
 
-        def decodeLSBInPixelChannel(channel, y, x)
-            value = @coverImgPixels[y][x][@rgb[channel]]
-            binary = conver8BitBinary(value)
-            return binary[7]
-        end
-
-        def isEvenNumber(num)
-            return num % 2 == 0
-        end
-
-        def conver8BitBinary(num)
-            binary = num.to_s(2)
-            if binary.length < 8
-                zeros = '0' * (8 - binary.length)
-                return zeros + binary
-            else
-                return binary
+        def flipLSBInCoverImg(b, cover_y, cover_x, channel)
+            if b == '1'
+                if Stegno::DCMisc.isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
+                    @coverImgPixels[cover_y][cover_x][@rgb[channel]] += 1
+                end
+            elsif b == '0'
+                if !Stegno::DCMisc.isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
+                    @coverImgPixels[cover_y][cover_x][@rgb[channel]] -= 1
+                end
             end
         end
 
-        def getXYfromNthPixel(n, width)
-            pixel_x = n % width
-            pixel_y = (n / width).floor
-
-            return {
-                x: pixel_x, y: pixel_y
-            }
+        def decodeLSBInPixelChannel(channel, y, x)
+            value = @coverImgPixels[y][x][@rgb[channel]]
+            binary = Stegno::DCMisc.conver8BitBinary(value)
+            return binary[7]
         end
+        
     end
 end

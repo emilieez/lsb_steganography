@@ -2,14 +2,13 @@ require 'blowfish'
 
 module Stegno
     class DCUtils
-        def initialize(coverImg, mode, key, secretImg=nil, secretImgName=nil, outputFile=nil, outputFormat)
+        def initialize(coverImg, mode, key, secretImg=nil, secretImgName=nil, outputFile=nil)
             @coverImg = coverImg
             @mode = mode
             @key = key
             @secretImg = secretImg
             @secretImgName = secretImgName
             @outputFile = outputFile
-            @outputFormat = outputFormat
         end
 
         def start
@@ -21,27 +20,21 @@ module Stegno
         end
 
         def encode
-            if @secretImgName.include? "/"
-                @secretImgName = @secretImgName.split("/")[-1] 
-            end
-
-            secretImgName = @secretImgName.split('.')[0] + ";"
-            secretImgFormat = @secretImgName.split('.')[1] + ";"
-
-            outputFile = @outputFile.split('.')[0]
-            outputFormat = @outputFormat.split('.')[1]
+            secretImgInfo = Stegno::DCMisc.getImgInfo(@secretImgName)
+            outputImgInfo = Stegno::DCMisc.getImgInfo(@outputFile)
 
             key = Blowfish::Key.generate(@key)
-            encrypted_secretImgName = Blowfish.encrypt(secretImgName, key)
+            encrypted_secretImgName = Blowfish.encrypt(secretImgInfo[:name] + "/", key)
 
-            dcImage = Stegno::DCImage.new(@coverImg, @secretImg, encrypted_secretImgName, secretImgFormat, @outputFile, @outputFormat)
+            dcImage = Stegno::DCImage.new(@coverImg, outputImgInfo[:name], outputImgInfo[:extension], key, @secretImg, encrypted_secretImgName, secretImgInfo[:extension] + "/")
             dcImage.encodeSecretFileInfo()
-            puts "HA;SDLKJFA;SDJ"
             dcImage.encodeImage()
         end
 
         def decode
-            dcImage = Stegno::DCImage.new(@coverImg)
+            outputImgInfo = Stegno::DCMisc.getImgInfo(@outputFile)
+
+            dcImage = Stegno::DCImage.new(@coverImg, outputImgInfo[:name], outputImgInfo[:extension], @key)
             dcImage.decodeSecretFileInfo()
             dcImage.decodeImage()
         end
