@@ -27,7 +27,7 @@ OptionParser.new do |opts|
         options[:secretImg] = secretImg
     end
 
-    opts.on("-o", "--output filename", String, "Output image. Can be any valid image format except for jpg/jpeg") do |output|
+    opts.on("-o", "--output filename", String, "Output image. Can be any lossless image format (e.g no jpg/jpeg") do |output|
         options[:output] = output
     end
 
