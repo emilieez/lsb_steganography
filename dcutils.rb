@@ -25,7 +25,7 @@ module Stegno
             secretImgInfo = Stegno::DCMisc.getImgInfo(@secretImgName)
             outputImgInfo = Stegno::DCMisc.getImgInfo(@outputFile)
 
-            encrypted_secretImgName = Stegno::DCMisc.blowfishEncrypt(secretImgInfo[:name] + "/", @blowfishKey)
+            encrypted_secretImgName = Stegno::DCMisc.blowfishEncrypt(secretImgInfo[:name], @blowfishKey) + "/"
 
             dcImage = Stegno::DCImage.new(@coverImg, outputImgInfo[:name], outputImgInfo[:extension], @blowfishKey, @caesarKey, @secretImg, encrypted_secretImgName, secretImgInfo[:extension] + "/")
             dcImage.encodeSecretFileInfo()

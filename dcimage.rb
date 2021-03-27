@@ -89,26 +89,27 @@ module Stegno
                     g_value = current_g_bin.to_i(2)
                     b_value = current_b_bin.to_i(2)
                     
+                    # puts Stegno::DCMisc.blowfishDecrypt(r_value.chr, @blowfishKey)
                     if r_value.chr == "/" && !filenameDone
                         filenameDone = true
-                    else
+                    elsif !filenameDone
                         @decodedFilename += r_value.chr
                     end
 
                     if g_value.chr == "/" && !formatDone
                         formatDone = true
-                    else
+                    elsif !formatDone
                         @decodedFileFormat += g_value.chr
                     end
 
                     if b_value.chr == "/" && !dimensionDone
                         dimensionDone = true
-                    else
+                    elsif !dimensionDone
                         @decodedFileDimension += b_value.chr
                     end
 
                     if filenameDone && formatDone && dimensionDone
-                        Break
+                        break
                     end
 
                     current_r_bin = ""
@@ -116,10 +117,10 @@ module Stegno
                     current_b_bin = ""
                 end
             }
-            
+
+             puts @decodedFileFormat
             decrypted_secretImgName = Stegno::DCMisc.blowfishDecrypt(@decodedFilename, @blowfishKey)
-            foundSecret = decrypted_secretImgName[0..decrypted_secretImgName.index('/') - 1]
-            puts "Found secret image: #{foundSecret}.#{@decodedFileFormat}"
+            puts "Found secret image: #{decrypted_secretImgName}.#{@decodedFileFormat}"
         end
 
         def decodeImage
