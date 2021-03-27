@@ -33,43 +33,19 @@ module Stegno
 
             cover_x = 0
             secretFileNameBinary.each_char{ |b|
-                if b == '1'
-                    if isEvenNumber(@coverImgPixels[0][cover_x][@rgb["r"]])
-                        @coverImgPixels[0][cover_x][@rgb["r"]] += 1
-                    end
-                elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[0][cover_x][@rgb["r"]])
-                       @coverImgPixels[0][cover_x][@rgb["r"]] -= 1
-                    end
-                end
+                flipLSBInCoverImg(b, 0, cover_x, 'r')
                 cover_x += 1
             }
 
             cover_x = 0
             secretFileFormatBinary.each_char{ |b|
-                if b == '1'
-                    if isEvenNumber(@coverImgPixels[0][cover_x][@rgb["g"]])
-                        @coverImgPixels[0][cover_x][@rgb["g"]] += 1
-                    end
-                elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[0][cover_x][@rgb["g"]])
-                       @coverImgPixels[0][cover_x][@rgb["g"]] -= 1
-                    end
-                end
+                flipLSBInCoverImg(b, 0, cover_x, 'g')
                 cover_x += 1
             }
 
             cover_x = 0
             secretFileWidthBinary.each_char{ |b|
-                if b == '1'
-                    if isEvenNumber(@coverImgPixels[0][cover_x][@rgb["b"]])
-                        @coverImgPixels[0][cover_x][@rgb["b"]] += 1
-                    end
-                elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[0][cover_x][@rgb["b"]])
-                       @coverImgPixels[0][cover_x][@rgb["b"]] -= 1
-                    end
-                end
+                flipLSBInCoverImg(b, 0, cover_x, 'b')
                 cover_x += 1
             }
         end
@@ -201,18 +177,22 @@ module Stegno
                 cover_x = cover_pix_coordinates[:x]
                 cover_y = cover_pix_coordinates[:y] + 1
 
-                if b == '1'
-                    if isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
-                        @coverImgPixels[cover_y][cover_x][@rgb[channel]] += 1
-                    end
-                elsif b == '0'
-                    if !isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
-                        @coverImgPixels[cover_y][cover_x][@rgb[channel]] -= 1
-                    end
-                end
+                flipLSBInCoverImg(b, cover_y, cover_x, channel)
                 
                 nth_cover_pix += 1
             }
+        end
+
+        def flipLSBInCoverImg(b, cover_y, cover_x, channel)
+            if b == '1'
+                if isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
+                    @coverImgPixels[cover_y][cover_x][@rgb[channel]] += 1
+                end
+            elsif b == '0'
+                if !isEvenNumber(@coverImgPixels[cover_y][cover_x][@rgb[channel]])
+                    @coverImgPixels[cover_y][cover_x][@rgb[channel]] -= 1
+                end
+            end
         end
 
         def decodeLSBInPixelChannel(channel, y, x)
