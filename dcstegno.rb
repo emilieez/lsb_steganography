@@ -31,7 +31,7 @@ OptionParser.new do |opts|
         options[:output] = output
     end
 
-    opts.on("-k", "--key 1234", String, "Encryption key, can be mix of number or text") do |output|
+    opts.on("-k", "--key foobar", String, "Encryption key. Use either ONLY numbers or ONLY text") do |output|
         options[:key] = output
     end
 
