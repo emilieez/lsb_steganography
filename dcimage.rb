@@ -92,6 +92,7 @@ module Stegno
 
             image = MiniMagick::Image.get_image_from_pixels(@coverImgPixels, [@coverImg.width, @coverImg.height], 'rgb', 8 , @outputFormat)
             image.write("#{@outputFile}.#{@outputFormat}")
+            puts "Encoded cover image > #{@outputFile}.#{@outputFormat}"
 
         end
 

@@ -27,12 +27,8 @@ OptionParser.new do |opts|
         options[:secretImg] = secretImg
     end
 
-    opts.on("-o", "--output filename", String, "Output image. Can be any valid image format") do |output|
+    opts.on("-o", "--output filename", String, "Output image. Can be any valid image format except for jpg/jpeg") do |output|
         options[:output] = output
-    end
-
-    opts.on("-f", "--format bmp", String, "Output image. Can be any valid image format") do |outputFormat|
-        options[:outputFormat] = outputFormat
     end
 
     opts.on("-k", "--key 1234", String, "Numbers only") do |output|
@@ -64,8 +60,7 @@ begin
         secretImg = MiniMagick::Image.open(options[:secretImg])
         checkImageSize(coverImg, secretImg, options[:secretImg])
     end
-    
-    stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], options[:key], secretImg, options[:secretImg], options[:output], options[:outputFormat])
+    stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], options[:key], secretImg, options[:secretImg], options[:output])
     stegno_applicaton.start
 end
 
