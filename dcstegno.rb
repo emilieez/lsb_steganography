@@ -49,9 +49,8 @@ def checkImageSize(cover, secret, secretFileName)
 
     requiredCoverImgPixels = secretImgPixels*8
     requiredCoverImgWidth = secretFilenameLength >= secretDimensionsLength ? secretFilenameLength*8 : secretDimensionsLength*8
-    requiredCoverImgSize = secret.size*8
 
-    if cover.size < requiredCoverImgSize || availableCoverImgPixels < requiredCoverImgPixels || cover.width < requiredCoverImgWidth
+    if availableCoverImgPixels < requiredCoverImgPixels || cover.width < requiredCoverImgWidth
         puts "Cover image is not big enough!"
         puts "Cover image requires minimum of #{requiredCoverImgPixels} Pixels, #{requiredCoverImgWidth}w, #{requiredCoverImgSize} bytes"
         exit(1)
