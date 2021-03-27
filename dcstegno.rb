@@ -15,24 +15,24 @@ options = {
 }
 
 OptionParser.new do |opts|
-    opts.on("-m", "--mode encode", String, "Encode/Decode") do |mode|
+    opts.on("-m", "--mode encode", String, "[Required] Encode/Decode") do |mode|
         options[:mode] = mode
     end
 
-    opts.on("-c", "--cover-img cover.bmp", String, "Image to be used as cover. Can be any valid image format") do |coverImg|
+    opts.on("-c", "--cover-img cover.bmp", String, "[Required] Cover image. Can be any valid image format") do |coverImg|
         options[:coverImg] = coverImg
     end
 
-    opts.on("-s", "--secret-img secret.bmp", String, "Secret image to be encoded in cover image. Can be any valid image format") do |secretImg|
-        options[:secretImg] = secretImg
-    end
-
-    opts.on("-o", "--output filename", String, "Output image. Can be any lossless image format (e.g no jpg/jpeg") do |output|
+    opts.on("-o", "--output filename", String, "[Required] Output image. Can be any lossless image format (e.g no jpg/jpeg") do |output|
         options[:output] = output
     end
 
-    opts.on("--blowfish foobar", String, "Encryption blowfishKey. Use either ONLY numbers or ONLY text") do |blowfishKey|
+    opts.on("--blowfish foobar", String, "[Required] Blowfish Encryption key.") do |blowfishKey|
         options[:blowfishKey] = blowfishKey
+    end
+
+    opts.on("-s", "--secret-img secret.bmp", String, "[Required in ENCODE mode] Secret image to be encoded in cover image. Can be any valid image format") do |secretImg|
+    options[:secretImg] = secretImg
     end
 
 end.parse!
