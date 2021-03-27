@@ -6,12 +6,9 @@ require_relative 'dcutils.rb'
 require_relative 'dcmisc.rb'
 
 options = {
-    mode: nil,
-    coverImg: nil,
-    secretImg: nil,
-    output: nil,
-    outputFormat: nil,
-    blowfishKey: nil
+    mode: nil, 
+    coverImg: nil, secretImg: nil, output: nil,
+    blowfishKey: nil, caesarKey: nil
 }
 
 OptionParser.new do |opts|
@@ -29,6 +26,10 @@ OptionParser.new do |opts|
 
     opts.on("--blowfish foobar", String, "[Required] Blowfish Encryption key.") do |blowfishKey|
         options[:blowfishKey] = blowfishKey
+    end
+
+    opts.on("--caesar 3", String, "[Required] Caesor Cipher shift.") do |caesarKey|
+        options[:caesarKey] = caesarKey
     end
 
     opts.on("-s", "--secret-img secret.bmp", String, "[Required in ENCODE mode] Secret image to be encoded in cover image. Can be any valid image format") do |secretImg|
