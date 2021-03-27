@@ -3,7 +3,7 @@ require 'mini_magick'
 module Stegno
     class DCImage
 
-        def initialize(coverImg, secretImg=nil, secretImgName=nil, secretImgFormat=nil, outputFile=nil, outputFormat=nil)
+        def initialize(coverImg, outputFile, outputFormat, secretImg=nil, secretImgName=nil, secretImgFormat=nil)
             @coverImg = coverImg
             @secretImg = secretImg
 
@@ -116,7 +116,6 @@ module Stegno
                     g_value = current_g_bin.to_i(2)
                     b_value = current_b_bin.to_i(2)
                     
-
                     if r_value.chr == ";" && !filenameDone
                         filenameDone = true
                     else
@@ -169,8 +168,6 @@ module Stegno
                         g_value = current_g_bin.to_i(2)
                         b_value = current_b_bin.to_i(2)
 
-                        # TODO: change 128 to secret image width
-                        # Break loop when secret image height has been met
                         if decoded_pixels[decoded_row_num].length == @decodedFileWidth.to_i
                             decoded_row_num += 1
                             decoded_pixels.push([])
@@ -185,8 +182,10 @@ module Stegno
             }
             decoded_pixels.pop() if decoded_pixels[-1].length != @decodedFileWidth.to_i
 
-            image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8 ,'png')
-            image.write("decoded.png")
+            image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8, @outputFormat)
+            
+            puts "Decoded image > #{@outputFile}.#{@outputFormat}"
+            image.write("#{@outputFile}.#{@outputFormat}")
         end
 
         def encodeLSBInPixelChannel(channel, y, x, nth_secret_pix)

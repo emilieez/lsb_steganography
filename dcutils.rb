@@ -21,27 +21,21 @@ module Stegno
         end
 
         def encode
-            if @secretImgName.include? "/"
-                @secretImgName = @secretImgName.split("/")[-1] 
-            end
-
-            secretImgName = @secretImgName.split('.')[0] + ";"
-            secretImgFormat = @secretImgName.split('.')[1] + ";"
+            secretImgInfo = Stegno::DCMisc.getSecretImgInfo(@secretImgName)
 
             outputFile = @outputFile.split('.')[0]
             outputFormat = @outputFormat.split('.')[1]
 
             key = Blowfish::Key.generate(@key)
-            encrypted_secretImgName = Blowfish.encrypt(secretImgName, key)
+            encrypted_secretImgName = Blowfish.encrypt(secretImgInfo[:name], key)
 
-            dcImage = Stegno::DCImage.new(@coverImg, @secretImg, encrypted_secretImgName, secretImgFormat, @outputFile, @outputFormat)
+            dcImage = Stegno::DCImage.new(@coverImg, @outputFile, @outputFormat, @secretImg, encrypted_secretImgName, secretImgInfo[:extension])
             dcImage.encodeSecretFileInfo()
-            puts "HA;SDLKJFA;SDJ"
             dcImage.encodeImage()
         end
 
         def decode
-            dcImage = Stegno::DCImage.new(@coverImg)
+            dcImage = Stegno::DCImage.new(@coverImg, @outputFile, @outputFormat)
             dcImage.decodeSecretFileInfo()
             dcImage.decodeImage()
         end

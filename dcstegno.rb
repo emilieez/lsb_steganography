@@ -3,6 +3,7 @@ require 'fastimage'
 
 require_relative 'dcimage.rb'
 require_relative 'dcutils.rb'
+require_relative 'dcmisc.rb'
 
 options = {
     mode: nil,
