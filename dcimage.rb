@@ -28,7 +28,7 @@ module Stegno
         def encodeSecretFileInfo
             secretFileNameBinary = @secretImgName.unpack("B*")[0]
             secretFileFormatBinary = @secretImgFormat.unpack("B*")[0]
-            secretFileWidthBinary = "#{@secretImg.width.to_s()};".unpack("B*")[0]
+            secretFileWidthBinary = "#{@secretImg.width.to_s()}/".unpack("B*")[0]
 
             encodeSecretBinary(secretFileNameBinary, 'r')
             encodeSecretBinary(secretFileFormatBinary, 'g')
@@ -86,19 +86,19 @@ module Stegno
                     g_value = current_g_bin.to_i(2)
                     b_value = current_b_bin.to_i(2)
                     
-                    if r_value.chr == ";" && !filenameDone
+                    if r_value.chr == "/" && !filenameDone
                         filenameDone = true
                     else
                         @decodedFilename += r_value.chr
                     end
 
-                    if g_value.chr == ";" && !formatDone
+                    if g_value.chr == "/" && !formatDone
                         formatDone = true
                     else
                         @decodedFileFormat += g_value.chr
                     end
 
-                    if b_value.chr == ";" && !widthDone
+                    if b_value.chr == "/" && !widthDone
                         widthDone = true
                     else
                         @decodedFileWidth += b_value.chr
@@ -113,6 +113,10 @@ module Stegno
                     current_b_bin = ""
                 end
             }
+            key = Blowfish::Key.generate("foobar")
+            decrypted_secretImgName = Blowfish.decrypt(@decodedFilename, key)
+            foundSecret = decrypted_secretImgName[0..decrypted_secretImgName.index('/') - 1]
+            puts "Found secret image: #{foundSecret}.#{@decodedFileFormat}"
         end
 
         def decodeImage
@@ -154,7 +158,7 @@ module Stegno
 
             image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8, @outputFormat)
             
-            puts "Decoded image > #{@outputFile}.#{@outputFormat}"
+            puts "Outputted secret image to #{@outputFile}.#{@outputFormat}"
             image.write("#{@outputFile}.#{@outputFormat}")
         end
 
