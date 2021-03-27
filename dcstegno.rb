@@ -28,7 +28,7 @@ OptionParser.new do |opts|
         options[:blowfishKey] = blowfishKey
     end
 
-    opts.on("--caesar 3", String, "[Required] Caesor Cipher shift.") do |caesarKey|
+    opts.on("--caesar 3", Integer, "[Required] Caesor Cipher shift.") do |caesarKey|
         options[:caesarKey] = caesarKey
     end
 
@@ -61,7 +61,7 @@ begin
         secretImg = MiniMagick::Image.open(options[:secretImg])
         checkImageSize(coverImg, secretImg, options[:secretImg])
     end
-    stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], options[:blowfishKey], secretImg, options[:secretImg], options[:output])
+    stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], options[:blowfishKey], options[:caesarKey], secretImg, options[:secretImg], options[:output])
     stegno_applicaton.start
 end
 

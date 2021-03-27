@@ -1,6 +1,6 @@
 module Stegno
     
-    BIN_CAESAR_ARRAY = (0..255).to_a
+    CAESAR_ARRAY = (0..255).to_a
 
     class DCMisc
 
@@ -15,8 +15,10 @@ module Stegno
             }
         end
 
-        def getCaesarShifted(num, shift)
-            return BIN_CAESAR_ARRAY[num + shift]
+        def self.getCaesarShiftedInt(num, shift)
+            result = num + shift
+            result = (result % 255)if result > 255
+            return CAESAR_ARRAY[result]
         end
         
         def self.isEvenNumber(num)

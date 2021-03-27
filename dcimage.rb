@@ -3,7 +3,7 @@ require 'mini_magick'
 module Stegno
     class DCImage
 
-        def initialize(coverImg, outputFile, outputFormat, blowfishKey, secretImg=nil, secretImgName=nil, secretImgFormat=nil)
+        def initialize(coverImg, outputFile, outputFormat, blowfishKey, caesarKey, secretImg=nil, secretImgName=nil, secretImgFormat=nil)
             @coverImg = coverImg
             @secretImg = secretImg
 
@@ -21,6 +21,7 @@ module Stegno
             }
 
             @blowfishKey = blowfishKey
+            @caesarKey = caesarKey
 
             @decodedFilename = ""
             @decodedFileFormat = ""
@@ -140,9 +141,13 @@ module Stegno
                     current_b_bin += decodeLSBInPixelChannel('b', y, x)
 
                     if current_r_bin.length && current_b_bin.length && current_g_bin.length == 8
-                        r_value = current_r_bin.to_i(2)
-                        g_value = current_g_bin.to_i(2)
-                        b_value = current_b_bin.to_i(2)
+                        ciphered_r_value = current_r_bin.to_i(2)
+                        ciphered_g_value = current_g_bin.to_i(2)
+                        ciphered_b_value = current_b_bin.to_i(2)
+
+                        r_value = Stegno::DCMisc.getCaesarShiftedInt(ciphered_r_value, @caesarKey)
+                        g_value = Stegno::DCMisc.getCaesarShiftedInt(ciphered_g_value, @caesarKey)
+                        b_value = Stegno::DCMisc.getCaesarShiftedInt(ciphered_b_value, @caesarKey)
 
                         if decoded_pixels[decoded_row_num].length == @decodedFileWidth.to_i
                             decoded_row_num += 1
@@ -166,6 +171,7 @@ module Stegno
 
         def encodeLSBInPixelChannel(channel, y, x, nth_secret_pix)
             value = @secretImgPixels[y][x][@rgb[channel]]
+            ciphered_value = Stegno::DCMisc.getCaesarShiftedInt(value, @caesarKey)
             binary = Stegno::DCMisc.conver8BitBinary(value)
 
             nth_cover_pix = nth_secret_pix * 8

@@ -2,13 +2,15 @@ require 'blowfish'
 
 module Stegno
     class DCUtils
-        def initialize(coverImg, mode, blowfishKey, secretImg=nil, secretImgName=nil, outputFile=nil)
-            @coverImg = coverImg
+        def initialize(coverImg, mode, blowfishKey, caesarKey, secretImg=nil, secretImgName=nil, outputFile=nil)
             @mode = mode
-            @blowfishKey = blowfishKey
+            @coverImg = coverImg
             @secretImg = secretImg
             @secretImgName = secretImgName
             @outputFile = outputFile
+            
+            @blowfishKey = blowfishKey
+            @caesarKey = caesarKey
         end
 
         def start
@@ -26,7 +28,7 @@ module Stegno
             blowfishKey = Blowfish::Key.generate(@blowfishKey)
             encrypted_secretImgName = Blowfish.encrypt(secretImgInfo[:name] + "/", blowfishKey)
 
-            dcImage = Stegno::DCImage.new(@coverImg, outputImgInfo[:name], outputImgInfo[:extension], blowfishKey, @secretImg, encrypted_secretImgName, secretImgInfo[:extension] + "/")
+            dcImage = Stegno::DCImage.new(@coverImg, outputImgInfo[:name], outputImgInfo[:extension], blowfishKey, @caesarKey, @secretImg, encrypted_secretImgName, secretImgInfo[:extension] + "/")
             dcImage.encodeSecretFileInfo()
             dcImage.encodeImage()
         end
@@ -34,7 +36,7 @@ module Stegno
         def decode
             outputImgInfo = Stegno::DCMisc.getImgInfo(@outputFile)
 
-            dcImage = Stegno::DCImage.new(@coverImg, outputImgInfo[:name], outputImgInfo[:extension], @blowfishKey)
+            dcImage = Stegno::DCImage.new(@coverImg, outputImgInfo[:name], outputImgInfo[:extension], @blowfishKey, @caesarKey)
             dcImage.decodeSecretFileInfo()
             dcImage.decodeImage()
         end
