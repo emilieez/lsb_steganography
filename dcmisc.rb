@@ -15,6 +15,11 @@ module Stegno
             }
         end
 
+        def self.blowfishEncrypt(message, key)
+            blowfishKey = Blowfish::Key.generate(key)
+            return Blowfish.encrypt(message, blowfishKey)
+        end
+
         def self.getCaesarShiftedInt(num, shift)
             result = num + shift
             result = ((result % 255) - 1) if result > 255
