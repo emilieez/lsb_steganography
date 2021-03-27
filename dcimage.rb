@@ -116,8 +116,8 @@ module Stegno
                     current_b_bin = ""
                 end
             }
-            blowfishKey = Blowfish::Key.generate(@blowfishKey)
-            decrypted_secretImgName = Blowfish.decrypt(@decodedFilename, blowfishKey)
+            
+            decrypted_secretImgName = Stegno::DCMisc.blowfishDecrypt(@decodedFilename, @blowfishKey)
             foundSecret = decrypted_secretImgName[0..decrypted_secretImgName.index('/') - 1]
             puts "Found secret image: #{foundSecret}.#{@decodedFileFormat}"
         end
