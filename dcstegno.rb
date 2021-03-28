@@ -37,15 +37,16 @@ OptionParser.new do |opts|
 end.parse!
 
 
-def checkImageSize(cover, secret, secretFileName) 
+def checkImageSize(cover, secret, secretFileName, secretFileFormat) 
     availableCoverImgPixels = cover.width * (cover.height - 1)
     
     secretImgPixels = secret.width * secret.height
     secretFilenameLength = "#{secretFileName}#{Stegno::EOL_SYMBOL}".length
+    secretFileFormatLength = "#{secretFileFormat}#{Stegno::EOL_SYMBOL}".length
     secretDimensionsLength = "#{secret.width},#{secret.height}#{Stegno::EOL_SYMBOL}".length
 
     requiredCoverImgPixels = secretImgPixels*8
-    requiredCoverImgWidth = secretFilenameLength >= secretDimensionsLength ? secretFilenameLength*8 : secretDimensionsLength*8
+    requiredCoverImgWidth = [secretFilenameLength, secretFileFormatLength, secretDimensionsLength].max*8
 
     if availableCoverImgPixels < requiredCoverImgPixels || cover.width < requiredCoverImgWidth
         puts "Cover image is not big enough!"
@@ -75,7 +76,7 @@ begin
     if options[:mode] == "encode"
         secretImg = MiniMagick::Image.open(options[:secretImg])
         secretImgInfo = Stegno::DCMisc.getImgInfo(options[:secretImg])
-        checkImageSize(coverImg, secretImg, secretImgInfo[:name])
+        checkImageSize(coverImg, secretImg, secretImgInfo[:name], secretImgInfo[:extension])
     end
     stegno_applicaton = Stegno::DCUtils.new(coverImg, options[:mode], options[:blowfishKey], options[:caesarKey], secretImg, options[:secretImg], options[:output])
     stegno_applicaton.start
