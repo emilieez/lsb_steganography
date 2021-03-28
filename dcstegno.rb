@@ -67,6 +67,16 @@ def validateArguments(options)
 end
 
 
+def validateFilePaths(coverImgPath, secretImgPath)
+    if !File.exists?(coverImgPath)
+        puts "#{coverImgPath} does not exist!"
+    end
+
+    if !File.exists?(secretImgPath)
+        puts "#{secretImgPath} does not exist!"
+    end
+end
+
 begin
     validateArguments(options)
 

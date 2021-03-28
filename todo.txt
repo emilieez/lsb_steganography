@@ -1,0 +1,31 @@
+input formats:
+	bmp
+	png
+	jpg
+	webp
+	tiff
+	svg
+
+encode output formats:
+	bmp
+	png
+	tiff
+	svg
+
+decode output formats:
+	bmp
+	png
+	jpg
+	webp
+	svg
+	tiff
+
+
+
+CLI Error checks
+Missing required arguments
+Invalid image paths
+Invalid image size
+Output jpg
+
+
