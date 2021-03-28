@@ -51,7 +51,7 @@ def checkImageSize(cover, secret, secretFileName, secretFileFormat)
     if availableCoverImgPixels < requiredCoverImgPixels || cover.width < requiredCoverImgWidth
         puts "Cover image is not big enough!"
         puts "Cover image has #{availableCoverImgPixels} available Pixels, #{cover.width}w"
-        puts "Minimum requirement to encode the secret iamge is #{requiredCoverImgPixels} Pixels, #{requiredCoverImgWidth}w"
+        puts "Minimum requirement to encode the supplied secret iamge is #{requiredCoverImgPixels} Pixels, #{requiredCoverImgWidth}w"
         exit(1)
     end
 end
@@ -70,15 +70,18 @@ end
 def validateFilePaths(coverImgPath, secretImgPath)
     if !File.exists?(coverImgPath)
         puts "#{coverImgPath} does not exist!"
+        exit(1)
     end
 
     if !File.exists?(secretImgPath)
         puts "#{secretImgPath} does not exist!"
+        exit(1)
     end
 end
 
 begin
     validateArguments(options)
+    validateFilePaths(options[:coverImg], options[:secretImg])
 
     coverImg = MiniMagick::Image.open(options[:coverImg])
     secretImg = nil;
