@@ -6,6 +6,8 @@ blowfish_key = "foobar2048"
 caesar_key = 42
 
 puts "Begin Encoding test..."
+puts
+puts
 
 Dir.foreach('coverImgs') do |coverImg|
     next if coverImg == '.' or coverImg == '..'
