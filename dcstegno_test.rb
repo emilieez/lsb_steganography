@@ -1,5 +1,5 @@
 output_formats = [
-    "svg", "tiff", "webp", "bmp", "png"
+    "svg", "tiff", "bmp", "png"
 ]
 
 blowfish_key = "foobar2048"
@@ -34,7 +34,7 @@ puts "Begin Decoding test..."
 puts 
 
 output_formats.push('jpg')
-output_formats.push('gif')
+output_formats.push('webp')
 
 Dir.foreach('outputs') do |outImg|
     next if outImg == '.' or outImg == '..'

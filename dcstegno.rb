@@ -86,6 +86,8 @@ begin
     coverImg = MiniMagick::Image.open(options[:coverImg])
     secretImg = nil;
 
+    system ("mkdir outputs") if !Dir.exists?("outputs")
+
     if options[:mode] == "encode"
         secretImg = MiniMagick::Image.open(options[:secretImg])
         secretImgInfo = Stegno::DCMisc.getImgInfo(options[:secretImg])
