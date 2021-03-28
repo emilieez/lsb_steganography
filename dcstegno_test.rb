@@ -44,7 +44,7 @@ Dir.foreach('outputs') do |outImg|
         decodeOutputName = "DECODED-#{output}.#{ext}"
         puts "Decoding #{outImg}"
 
-        system("ruby dcstegno.rb -m decode -c outputs/#{outImg} -o #{decodeOutputName} --blowfish #{blowfish_key} --caesar #{caesar_key}")
+        system("ruby dcstegno.rb -m decode -c outputs/#{outImg} -o #{decodeOutputName} --blowfish #{blowfish_key} --caesar -#{caesar_key}")
         puts
     } 
     puts 
