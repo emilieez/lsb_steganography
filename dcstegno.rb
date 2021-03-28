@@ -49,7 +49,8 @@ def checkImageSize(cover, secret, secretFileName)
 
     if availableCoverImgPixels < requiredCoverImgPixels || cover.width < requiredCoverImgWidth
         puts "Cover image is not big enough!"
-        puts "Cover image requires minimum of #{requiredCoverImgPixels} Pixels, #{requiredCoverImgWidth}w, #{requiredCoverImgSize} bytes"
+        puts "Cover image has #{availableCoverImgPixels} available Pixels, #{cover.width}w"
+        puts "Minimum requirement to encode the secret iamge is #{requiredCoverImgPixels} Pixels, #{requiredCoverImgWidth}w"
         exit(1)
     end
 end
