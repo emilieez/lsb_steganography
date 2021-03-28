@@ -54,7 +54,7 @@ module Stegno
 
             nth_secret_pix = 0
 
-            (0..max_secretImg_y - 1).each{ |y|
+            (1..max_secretImg_y - 1).each{ |y|
                 (0..max_secretImg_x - 1).each{ |x|
                     encodeLSBInPixelChannel('r', y, x, nth_secret_pix)
                     encodeLSBInPixelChannel('g', y, x, nth_secret_pix)
