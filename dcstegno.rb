@@ -73,7 +73,7 @@ def validateFilePaths(coverImgPath, secretImgPath)
         exit(1)
     end
 
-    if !File.exists?(secretImgPath)
+    if !secretImgPath.nil? && !File.exists?(secretImgPath)
         puts "#{secretImgPath} does not exist!"
         exit(1)
     end
