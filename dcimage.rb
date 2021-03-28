@@ -175,11 +175,9 @@ module Stegno
 
             # Trim extra pixels to match the secret image height
             decoded_pixels = decoded_pixels[0..secretImg_height - 1]
-            puts decoded_pixels.length
-
             image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8, @outputFormat)
-            
             image.write("outputs/#{@outputFile}.#{@outputFormat}")
+            
             puts "Outputted secret image to outputs/#{@outputFile}.#{@outputFormat}"
         end
 
