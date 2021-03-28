@@ -108,7 +108,6 @@ module Stegno
                     g_value = rgb_bins[:g].to_i(2)
                     b_value =  rgb_bins[:b].to_i(2)
                     
-                    # puts Stegno::DCMisc.blowfishDecrypt(r_value.chr, @blowfishKey)
                     if r_value.chr == Stegno::EOL_SYMBOL && !filenameDone
                         filenameDone = true
                     elsif !filenameDone
@@ -174,9 +173,9 @@ module Stegno
                 }
             }
 
-            # Trim extra pixels to match the secret image width and height
-            decoded_pixels.pop() if decoded_pixels[-1].length != secretImg_width
-            decoded_pixels = decoded_pixels[0..secretImg_height.to_i - 1]
+            # Trim extra pixels to match the secret image height
+            decoded_pixels = decoded_pixels[0..secretImg_height - 1]
+            puts decoded_pixels.length
 
             image = MiniMagick::Image.get_image_from_pixels(decoded_pixels, [decoded_pixels[0].length, decoded_pixels.length], 'rgb', 8, @outputFormat)
             
