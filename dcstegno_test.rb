@@ -39,7 +39,7 @@ output_formats.push('jpg')
 output_formats.push('webp')
 
 Dir.foreach('outputs') do |outImg|
-    next if outImg == '.' or outImg == '..'
+    next if outImg == '.' or outImg == '..' or outImg.include?("DECODED")
 
      output_formats.each { |ext|
         output = outImg.gsub(/\./, "_")
